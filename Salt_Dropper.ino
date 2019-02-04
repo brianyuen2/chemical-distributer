@@ -165,9 +165,9 @@ void oneG(){
   char option = getOption();
   if(option == 'A') {
     countdown();
-    dispenseSalt(3);
+    dispenseSalt(1);
   } 
-  moveCart();
+  dumpSalt();
 }
 
 
@@ -221,13 +221,13 @@ void dispenseSalt(int grams) {
 
 void dumpSalt() {
   digitalWrite(23, HIGH); 
-  delay(500);
+  delay(300);
   digitalWrite(23, LOW);
   
-  delay(200);
+  moveCart();
 
-  digitalWrite(22, HIGH);
-  delay(500);
+  digitalWrite(22, HIGH); // PURPLE
+  delay(300);
   digitalWrite(22, LOW);
 }
 
@@ -236,15 +236,12 @@ void moveCart() {
   digitalWrite(in2, HIGH);
   analogWrite(enA, 300);
 
-  delay(200);
-  dumpSalt();
-
-  delay(2800);
-  
+  delay(1100);
+    
   digitalWrite(in2, LOW);
   digitalWrite(in1, HIGH);
   analogWrite(enA, 300);
-  delay(4500);
+  delay(1100);
 
   digitalWrite(in1, LOW);
   digitalWrite(in2, LOW);
