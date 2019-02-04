@@ -176,12 +176,12 @@ void startMotor() {
     digitalWrite(in4, LOW);
     digitalWrite(in3, HIGH);
     analogWrite(enB, 200); 
-    delay(200);
+    delay(100);
   } else {
     digitalWrite(in3, LOW);
     digitalWrite(in4, HIGH);
     analogWrite(enB, 200);
-    delay(200);
+    delay(100);
   }   
   direction = !direction;
   digitalWrite(in4, LOW);
@@ -190,8 +190,8 @@ void startMotor() {
 
 void init_scale(){
   lcd.print("Init...");
-  for(int i = 0; i < 5; i++) {
-    raw = scale.read_average(20);
+  for(int i = 0; i < 8; i++) {
+    raw = scale.read_average(10);
     Serial.println(raw-offset);
     //delay(300);
   }
@@ -234,13 +234,13 @@ void dumpSalt() {
 void moveCart() {
   digitalWrite(in1, LOW);
   digitalWrite(in2, HIGH);
-  analogWrite(enA, 300);
+  analogWrite(enA, 130);
 
   delay(1100);
     
   digitalWrite(in2, LOW);
   digitalWrite(in1, HIGH);
-  analogWrite(enA, 300);
+  analogWrite(enA, 130);
   delay(1100);
 
   digitalWrite(in1, LOW);
