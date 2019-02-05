@@ -221,13 +221,13 @@ void dispenseSalt(int grams) {
 
 void dumpSalt() {
   digitalWrite(23, HIGH); 
-  delay(300);
-  digitalWrite(23, LOW);
+  delay(200);
+  
 
   moveCart();
 
   digitalWrite(22, HIGH); // PURPLE
-  delay(300);
+  delay(400);
   digitalWrite(22, LOW);
 }
 
@@ -235,8 +235,9 @@ void moveCart() {
   digitalWrite(in2, LOW);
   digitalWrite(in1, HIGH);
   analogWrite(enA, 128);
-
-  delay(1100);
+  delay(200);
+  digitalWrite(23, LOW);
+  delay(900);
   
   digitalWrite(in1, LOW);
   digitalWrite(in2, HIGH);
