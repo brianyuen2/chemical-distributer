@@ -223,7 +223,7 @@ void dumpSalt() {
   digitalWrite(23, HIGH); 
   delay(300);
   digitalWrite(23, LOW);
-  
+
   moveCart();
 
   digitalWrite(22, HIGH); // PURPLE
@@ -232,17 +232,18 @@ void dumpSalt() {
 }
 
 void moveCart() {
-  digitalWrite(in1, LOW);
-  digitalWrite(in2, HIGH);
-  analogWrite(enA, 130);
-
-  delay(1100);
-    
   digitalWrite(in2, LOW);
   digitalWrite(in1, HIGH);
-  analogWrite(enA, 130);
+  analogWrite(enA, 128);
+
+  delay(1100);
+  
+  digitalWrite(in1, LOW);
+  digitalWrite(in2, HIGH);
+  analogWrite(enA, 128);
   delay(1100);
 
+  
   digitalWrite(in1, LOW);
   digitalWrite(in2, LOW);
 }
