@@ -3,22 +3,24 @@
 #include <Wire.h>
 #include <HX711.h>
 
+
+
 /////////////// Scale
-HX711 scale(A1, A0);
+HX711 scale(A1, A0); //Red wire from load cell -> yellow wire -> E+ on HX711, other wires are in order.
 long raw;
 long offset = 0;
 double Scale = 12295;
 double init_weight;
 
-/////////////// Motor
-//Rotor
+
+//Rotor motor
 int enB = 3;
-int in3 = 4;
+int in3 = 4; // Does not matter which way you connect the wires
 int in4 = 5;
 
 // Cart Motor
 int enA = 25;
-int in1 = 27;
+int in1 = 27; //Connect red wire from motor to red wire from motor driver (Right side when looking from front)
 int in2 = 29;
 int direction = 1;
 
@@ -41,8 +43,7 @@ byte colPins[COLS] = {13, 12, 11, 10};
 
 ////////////// Lcd
 LiquidCrystal_I2C lcd(0x27,16,2); 
-char start[] = "Select mass of ";
-char start2[] = "salt: (1, 5, 7)";
+char start[] = "Press 1 to start. ";
 
 
 Keypad customKeypad = Keypad(makeKeymap(hexaKeys), rowPins, colPins, ROWS, COLS); 
@@ -60,8 +61,8 @@ void setup(){
   pinMode(in1, OUTPUT);
   pinMode(in2, OUTPUT);
 
-  pinMode(22, OUTPUT); // Dump motor
-  pinMode(23, OUTPUT);
+  pinMode(22, OUTPUT); // Dump salt into funnel motor. 
+  pinMode(23, OUTPUT); // Connect the blue wire from the motor to the blue wire from arduino
   scale.set_gain(128);
   init_scale();
   Serial.println(offset);
@@ -73,16 +74,9 @@ void loop(){
   char customKey = getOption();
   delay(1000);
   Serial.println(customKey);
-  if (customKey == 53) {
-    fiveG();
-  } else if(customKey == 55) {
-    sevenG();
-  } else if(customKey == 49) {
+  if (customKey == 49) {
     oneG();
-  } else if(customKey == 'C') {
-    refreshSalt();
   }
-
   lcd.clear();
   delay(1000);
   
@@ -93,8 +87,6 @@ void loop(){
 
 void askOption() {
   lcd.print(start);
-  lcd.setCursor(0,1);
-  lcd.print(start2);
 }
 
 int getOption() {
@@ -106,36 +98,6 @@ int getOption() {
       return customKey;  
     }
   }
-}
-
-void fiveG(){
-  lcd.clear();
-  lcd.setCursor(0,0);
-  char fiveGs[16] = "5g, A: Confirm";
-  char fiveGs2[16] = "B: Cancel";
-  lcd.print(fiveGs);
-  lcd.setCursor(0,1);
-  lcd.print(fiveGs2);
-  char option = getOption();
-  if(option == 'A') {
-    countdown();
-    startMotor();
-  } 
-}
-
-void sevenG(){
-  lcd.clear();
-  lcd.setCursor(0,0);
-  char sevenGs[16] = "7g, A: Confirm";
-  char sevenGs2[16] = "B: Cancel";
-  lcd.print(sevenGs);
-  lcd.setCursor(0,1);
-  lcd.print(sevenGs2);
-  char option = getOption();
-  if(option == 'A') {
-    countdown();
-    startMotor();
-  } 
 }
 
 void countdown() {
@@ -157,7 +119,7 @@ void countdown() {
 void oneG(){
   lcd.clear();
   lcd.setCursor(0,0);
-  char oneGs[16] = "1g, A: Confirm";
+  char oneGs[16] = "A: Confirm";
   char oneGs2[16] = "B: Cancel";
   lcd.print(oneGs);
   lcd.setCursor(0,1);
@@ -165,7 +127,7 @@ void oneG(){
   char option = getOption();
   if(option == 'A') {
     countdown();
-    dispenseSalt(1);
+    dispenseSalt(3.5);
   } 
   dumpSalt();
 }
@@ -175,12 +137,12 @@ void startMotor() {
   if (direction == 1) {
     digitalWrite(in4, LOW);
     digitalWrite(in3, HIGH);
-    analogWrite(enB, 200); 
+    analogWrite(enB, 220); 
     delay(100);
   } else {
     digitalWrite(in3, LOW);
     digitalWrite(in4, HIGH);
-    analogWrite(enB, 200);
+    analogWrite(enB, 220);
     delay(100);
   }   
   direction = !direction;
@@ -205,11 +167,16 @@ void init_scale(){
   lcd.clear();
 }
 
-void dispenseSalt(int grams) {
+void dispenseSalt(double grams) {
   double mass = 0;
   while(mass < grams) {
     raw = scale.read_average(10);
     mass = (raw - offset)/Scale;
+    if(mass < (-0.3)) {
+      lcd.clear();
+      lcd.print("Restart system.");
+      while(1) {}
+    }
     Serial.println(mass);
     startMotor();
   }
@@ -220,47 +187,40 @@ void dispenseSalt(int grams) {
 }
 
 void dumpSalt() {
+
   digitalWrite(23, HIGH); 
-  delay(200);
-  
+  delay(400);
+  digitalWrite(23, LOW);
 
   moveCart();
-
+  
   digitalWrite(22, HIGH); // PURPLE
   delay(400);
   digitalWrite(22, LOW);
 }
 
 void moveCart() {
-  digitalWrite(in2, LOW);
-  digitalWrite(in1, HIGH);
-  analogWrite(enA, 128);
-  delay(200);
-  digitalWrite(23, LOW);
-  delay(900);
-  
   digitalWrite(in1, LOW);
   digitalWrite(in2, HIGH);
-  analogWrite(enA, 128);
+  analogWrite(enA, 160);
+  
+  //delay(400);
+  
+  //digitalWrite(23, LOW);
+
+
   delay(1100);
+  digitalWrite(in2, LOW);
+  digitalWrite(in1, LOW);
+
+  delay(500);
+  
+  digitalWrite(in2, LOW);
+  digitalWrite(in1, HIGH);
+  analogWrite(enA, 160);
+  delay(1310);
 
   
   digitalWrite(in1, LOW);
   digitalWrite(in2, LOW);
-}
-
-void refreshSalt() {
-  countdown();
-  for( int i = 0; i < 10; i++){  
-    digitalWrite(in4, LOW);
-    digitalWrite(in3, HIGH);
-    analogWrite(enB, 200); 
-    delay(500);
-    digitalWrite(in4, HIGH);
-    digitalWrite(in3, LOW);
-    analogWrite(enB, 200); 
-    delay(500);
-    digitalWrite(in4, LOW);
-    digitalWrite(in3, LOW);
-  }
 }
